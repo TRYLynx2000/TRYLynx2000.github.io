@@ -47,7 +47,6 @@
 						<p class="lead">Atbash · Caesar · Vigenère — Dark theme tool</p>
 					</div>
 				</div>
-				<div style="font-size:13px;color:var(--muted)">Offline · Client-side</div>
 			</div>
 			<div class="body">
 				<div class="sidebar">
@@ -85,7 +84,6 @@
 								<textarea id="outputText" readonly placeholder="Result appears here..."></textarea>
 								<div style="display:flex;gap:8px;margin-top:8px">
 									<button id="copyBtn" class="btn secondary">Copy</button>
-									<button id="downloadBtn" class="btn secondary">Download</button>
 								</div>
 							</div>
 						</div>
@@ -105,7 +103,6 @@
 		const inputText = document.getElementById('inputText');
 		const outputText = document.getElementById('outputText');
 		const copyBtn = document.getElementById('copyBtn');
-		const downloadBtn = document.getElementById('downloadBtn');
 		const swapBtn = document.getElementById('swapBtn');
 
 		let mode = 'encrypt';
@@ -218,13 +215,7 @@
 			try{ document.execCommand('copy'); }catch(e){navigator.clipboard.writeText(outputText.value)}
 		});
 
-		downloadBtn.addEventListener('click', ()=>{
-			const blob = new Blob([outputText.value],{type:'text/plain;charset=utf-8'});
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url; a.download = (mode==='encrypt'?'encrypted':'decrypted') + '.txt';
-			document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-		});
+		// download feature removed
 
 		// Keyboard shortcut: Ctrl+Enter to run
 		document.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ runAction(); } });
