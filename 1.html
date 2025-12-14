@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Encrypt / Decrypt — Atbash · Caesar · Vigenère</title>
+	<style>
+		:root{
+			--bg:#0b0f14; --panel:#0f1720; --muted:#9aa6b2; --accent:#7c4dff; --accent-2:#00d4ff; --glass:rgba(255,255,255,0.03);
+			--success:#4ade80; --danger:#ff6b6b; --card:#0c1217;
+			font-family:Inter,Segoe UI,system-ui,Roboto,Arial,sans-serif;
+		}
+		html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071016 90%);color:#e6eef6}
+		.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}
+		.card{width:960px;max-width:96%;background:linear-gradient(180deg,var(--panel),#071017);border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.7);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+		.header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.02)}
+		.title{display:flex;gap:12px;align-items:center}
+		.logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700}
+		h1{font-size:18px;margin:0}
+		p.lead{margin:0;color:var(--muted);font-size:13px}
+		.body{display:grid;grid-template-columns:360px 1fr;gap:18px;padding:22px}
+		.sidebar{padding:12px;background:var(--glass);border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+		.tabs{display:flex;gap:8px;margin-bottom:12px}
+		.tab{flex:1;padding:8px 10px;border-radius:8px;text-align:center;cursor:pointer;background:transparent;color:var(--muted);border:1px solid transparent}
+		.tab.active{background:linear-gradient(180deg,rgba(124,77,255,0.12),rgba(0,212,255,0.03));color:#eaf0ff;border:1px solid rgba(124,77,255,0.18)}
+		label{display:block;font-size:12px;color:var(--muted);margin:8px 0 6px}
+		select,input[type="text"],input[type="number"],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:#071018;color:#e6eef6;outline:none}
+		textarea{min-height:160px;resize:vertical}
+		.actions{display:flex;gap:8px;margin-top:12px}
+		.btn{padding:10px 12px;border-radius:8px;border:none;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021;box-shadow:0 6px 18px rgba(124,77,255,0.12)}
+		.btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
+		.output-wrap{padding:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+		.footer{padding:14px;text-align:center;color:var(--muted);font-size:13px}
+		.hint{font-size:12px;color:var(--muted);margin-top:8px}
+		.row{display:flex;gap:10px;align-items:center}
+		@media(max-width:900px){.body{grid-template-columns:1fr;}.sidebar{order:2}}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<div class="card" role="main">
+			<div class="header">
+				<div class="title">
+					<div class="logo">ED</div>
+					<div>
+						<h1>Encrypt / Decrypt</h1>
+						<p class="lead">Atbash · Caesar · Vigenère — Dark theme tool</p>
+					</div>
+				</div>
+				<div style="font-size:13px;color:var(--muted)">Offline · Client-side</div>
+			</div>
+			<div class="body">
+				<div class="sidebar">
+					<div class="tabs" role="tablist">
+						<div class="tab active" data-mode="encrypt">Encryption</div>
+						<div class="tab" data-mode="decrypt">Decryption</div>
+					</div>
+
+					<label>Cipher</label>
+					<select id="cipherSelect">
+						<option value="atbash">Atbash (symmetric)</option>
+						<option value="caesar">Caesar (shift)</option>
+						<option value="vigenere">Vigenère (keyword)</option>
+					</select>
+
+					<div id="keyArea" style="margin-top:10px"></div>
+
+					<div class="hint">Choose a mode, select cipher, provide key as needed, then press the action button.</div>
+				</div>
+
+				<div>
+					<label>Input text</label>
+					<textarea id="inputText" placeholder="Type or paste text here..."></textarea>
+
+					<div style="display:flex;gap:12px;margin-top:12px;align-items:flex-start">
+						<div style="flex:1">
+							<div class="actions">
+								<button id="actionBtn" class="btn">Encrypt</button>
+								<button id="swapBtn" class="btn secondary">Clear</button>
+							</div>
+						</div>
+						<div style="width:260px">
+							<label>Result</label>
+							<div class="output-wrap">
+								<textarea id="outputText" readonly placeholder="Result appears here..."></textarea>
+								<div style="display:flex;gap:8px;margin-top:8px">
+									<button id="copyBtn" class="btn secondary">Copy</button>
+									<button id="downloadBtn" class="btn secondary">Download</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="footer">Built-in Atbash, Caesar, and Vigenère — works offline in your browser.</div>
+		</div>
+	</div>
+
+	<script>
+		// UI wiring
+		const tabs = document.querySelectorAll('.tab');
+		const actionBtn = document.getElementById('actionBtn');
+		const cipherSelect = document.getElementById('cipherSelect');
+		const keyArea = document.getElementById('keyArea');
+		const inputText = document.getElementById('inputText');
+		const outputText = document.getElementById('outputText');
+		const copyBtn = document.getElementById('copyBtn');
+		const downloadBtn = document.getElementById('downloadBtn');
+		const swapBtn = document.getElementById('swapBtn');
+
+		let mode = 'encrypt';
+
+		function setMode(m){
+			mode = m;
+			tabs.forEach(t=>t.classList.toggle('active', t.dataset.mode===m));
+			actionBtn.textContent = m=== 'encrypt' ? 'Encrypt' : 'Decrypt';
+			updateKeyUI();
+		}
+
+		tabs.forEach(t=>t.addEventListener('click', ()=>setMode(t.dataset.mode)));
+		cipherSelect.addEventListener('change', updateKeyUI);
+
+		function updateKeyUI(){
+			const c = cipherSelect.value;
+			keyArea.innerHTML = '';
+			if(c === 'atbash'){
+				// no key
+				keyArea.innerHTML = '<label>Atbash has no key</label>';
+			} else if(c === 'caesar'){
+				keyArea.innerHTML = '<label>Shift (integer)</label><input id="caesarShift" type="number" value="3" min="-1000" max="1000">';
+			} else if(c === 'vigenere'){
+				keyArea.innerHTML = '<label>Keyword (letters only)</label><input id="vigenereKey" type="text" placeholder="e.g. KEY">';
+			}
+		}
+		updateKeyUI();
+
+		// Cipher implementations
+		function atbash(text){
+			const aCode = 'a'.charCodeAt(0);
+			const ACode = 'A'.charCodeAt(0);
+			return text.split('').map(ch=>{
+				if(ch>='a' && ch<='z'){
+					return String.fromCharCode( aCode + (25 - (ch.charCodeAt(0)-aCode)) );
+				}
+				if(ch>='A' && ch<='Z'){
+					return String.fromCharCode( ACode + (25 - (ch.charCodeAt(0)-ACode)) );
+				}
+				return ch;
+			}).join('');
+		}
+
+		function caesar(text, shift){
+			const s = ((parseInt(shift,10) || 0) % 26 + 26) % 26;
+			return text.split('').map(ch=>{
+				if(ch>='a' && ch<='z'){
+					const base = 'a'.charCodeAt(0);
+					return String.fromCharCode( ( (ch.charCodeAt(0)-base + s) % 26 ) + base );
+				}
+				if(ch>='A' && ch<='Z'){
+					const base = 'A'.charCodeAt(0);
+					return String.fromCharCode( ( (ch.charCodeAt(0)-base + s) % 26 ) + base );
+				}
+				return ch;
+			}).join('');
+		}
+
+		function vigenere(text, key, decrypt=false){
+			if(!key) return text;
+			const cleanedKey = key.replace(/[^a-zA-Z]/g, '');
+			if(cleanedKey.length === 0) return text;
+			let ki = 0;
+			return text.split('').map(ch=>{
+				const kch = cleanedKey[ki % cleanedKey.length];
+				const kshift = (kch.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0));
+				if(ch>='a' && ch<='z'){
+					const base = 'a'.charCodeAt(0);
+					const offset = ch.charCodeAt(0)-base;
+					const s = decrypt ? (offset - kshift + 26) % 26 : (offset + kshift) % 26;
+					ki += 1;
+					return String.fromCharCode(base + s);
+				}
+				if(ch>='A' && ch<='Z'){
+					const base = 'A'.charCodeAt(0);
+					const offset = ch.charCodeAt(0)-base;
+					const s = decrypt ? (offset - kshift + 26) % 26 : (offset + kshift) % 26;
+					ki += 1;
+					return String.fromCharCode(base + s);
+				}
+				return ch;
+			}).join('');
+		}
+
+		// High-level runner
+		function runAction(){
+			const c = cipherSelect.value;
+			const text = inputText.value || '';
+			let result = '';
+			if(c === 'atbash'){
+				result = atbash(text);
+			} else if(c === 'caesar'){
+				const shiftEl = document.getElementById('caesarShift');
+				const shift = shiftEl? parseInt(shiftEl.value||'0',10) : 0;
+				const effShift = mode === 'encrypt' ? shift : -shift;
+				result = caesar(text, effShift);
+			} else if(c === 'vigenere'){
+				const keyEl = document.getElementById('vigenereKey');
+				const key = keyEl ? keyEl.value : '';
+				result = vigenere(text, key, mode==='decrypt');
+			}
+			outputText.value = result;
+		}
+
+		actionBtn.addEventListener('click', runAction);
+		swapBtn.addEventListener('click', ()=>{ inputText.value=''; outputText.value=''; });
+
+		copyBtn.addEventListener('click', ()=>{
+			outputText.select();
+			try{ document.execCommand('copy'); }catch(e){navigator.clipboard.writeText(outputText.value)}
+		});
+
+		downloadBtn.addEventListener('click', ()=>{
+			const blob = new Blob([outputText.value],{type:'text/plain;charset=utf-8'});
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url; a.download = (mode==='encrypt'?'encrypted':'decrypted') + '.txt';
+			document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+		});
+
+		// Keyboard shortcut: Ctrl+Enter to run
+		document.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ runAction(); } });
+	</script>
+</body>
+</html>
