@@ -6,13 +6,13 @@
 	<title>Encrypt / Decrypt — Atbash · Caesar · Vigenère</title>
 	<style>
 		:root{
-			--bg:#000000; --panel:#07110a; --muted:#78d089; --accent:#00ff5a; --accent-2:#00b37a; --glass:rgba(0,255,90,0.03);
-			--success:#4ade80; --danger:#ff6b6b; --card:#06100a;
+			--bg:#000000; --panel:#000000; --muted:#66ff99; --accent:#00ff66; --accent-2:#00cc66; --glass:rgba(0,255,102,0.03);
+			--text:#66ff99; --input-bg:#00140a; --card:#000000;
 			font-family:Inter,Segoe UI,system-ui,Roboto,Arial,sans-serif;
 		}
-		html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#001409 90%);color:#c9f7d0}
+		html,body{height:100%;margin:0;background:var(--bg);color:var(--text)}
 		.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}
-		.card{width:960px;max-width:96%;background:linear-gradient(180deg,var(--panel),#071017);border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.7);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+		.card{width:960px;max-width:96%;background:linear-gradient(180deg,var(--panel),#00140a);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.8);overflow:hidden;border:1px solid rgba(0,255,102,0.04)}
 		.header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.02)}
 		.title{display:flex;gap:12px;align-items:center}
 		.logo{width:44px;height:44px;flex:0 0 44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;overflow:hidden}
@@ -24,9 +24,9 @@
 		.sidebar{padding:12px;background:var(--glass);border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
 		.tabs{display:flex;gap:8px;margin-bottom:12px}
 		.tab{flex:1;padding:8px 10px;border-radius:8px;text-align:center;cursor:pointer;background:transparent;color:var(--muted);border:1px solid transparent}
-		.tab.active{background:linear-gradient(180deg,rgba(0,255,90,0.12),rgba(0,179,122,0.03));color:#eaffef;border:1px solid rgba(0,255,90,0.18)}
+		.tab.active{background:linear-gradient(180deg,rgba(0,255,102,0.10),rgba(0,204,102,0.02));color:var(--text);border:1px solid rgba(0,255,102,0.12)}
 		label{display:block;font-size:12px;color:var(--muted);margin:8px 0 6px}
-		select,input[type="text"],input[type="number"],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:#071018;color:#e6eef6;outline:none}
+		select,input[type="text"],input[type="number"],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,255,102,0.06);background:var(--input-bg);color:var(--text);outline:none}
 		textarea{min-height:160px;resize:vertical}
 		.actions{display:flex;gap:8px;margin-top:12px}
 		.btn{padding:10px 12px;border-radius:8px;border:none;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021;box-shadow:0 6px 18px rgba(0,255,90,0.08)}
