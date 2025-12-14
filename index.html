@@ -15,7 +15,9 @@
 		.card{width:960px;max-width:96%;background:linear-gradient(180deg,var(--panel),#071017);border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.7);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
 		.header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.02)}
 		.title{display:flex;gap:12px;align-items:center}
-		.logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700}
+		.logo{width:44px;height:44px;flex:0 0 44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;overflow:hidden}
+		.logo img{width:44px;height:44px;border-radius:10px;display:block;object-fit:cover}
+		.logo-fallback{display:flex;align-items:center;justify-content:center;width:44px;height:44px}
 		h1{font-size:18px;margin:0}
 		p.lead{margin:0;color:var(--muted);font-size:13px}
 		.body{display:grid;grid-template-columns:360px 1fr;gap:18px;padding:22px}
@@ -41,12 +43,13 @@
 		<div class="card" role="main">
 			<div class="header">
 				<div class="title">
-					<img id="logoImg" src="logo.jpeg" alt="ED logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+					<div class="logo">
+						<img id="logoImg" src="logo.png" alt="ED logo" data-attempt="png" onerror="if(this.dataset.attempt==='png'){this.dataset.attempt='jpeg'; this.src='logo.jpeg'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex' }">
 						<div class="logo-fallback" style="display:none">ED</div>
 					</div>
 					<div>
 						<h1>Encrypt / Decrypt</h1>
-						<p class="lead">Atbash · Caesar · Vigenère</p>
+						<p class="lead">Atbash · Caesar · Vigenère — Dark theme tool</p>
 					</div>
 				</div>
 			</div>
@@ -92,7 +95,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="footer">Patrick Horvath Ionel, Ayan Alexa Filip & Potre Teodor Florin.</div>
+			<div class="footer">Built-in Atbash, Caesar, and Vigenère — works offline in your browser.</div>
 		</div>
 	</div>
 
@@ -224,9 +227,3 @@
 	</script>
 </body>
 </html>
-
-
-
-
-
-
